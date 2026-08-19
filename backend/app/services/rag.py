@@ -1,23 +1,37 @@
 from __future__ import annotations
 
-import os
-from pathlib import Path
 from typing import Any
 
-from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import FAISS
-from langchain_openai import OpenAIEmbeddings
+from langchain_core.documents import Document
 
-from app.config import DATA_DIR, EMBEDDING_MODEL, OPENAI_API_KEY
+from app.config import DATA_DIR, TOP_K, VECTOR_STORE_DIR
+from app.services.embeddings import get_embeddings
 
-INDEX_PATH = DATA_DIR / "faiss_index"
+INDEX_PATH = VECTOR_STORE_DIR / "faiss_index"
 
 
-def _ensure_embeddings() -> Any:
-    if not OPENAI_API_KEY:
-        raise ValueError("OPENAI_API_KEY is not configured. Add it to backend/.env")
-    return OpenAIEmbeddings(model=EMBEDDING_MODEL, openai_api_key=OPENAI_API_KEY)
+def chunk_documents(chunks: list[dict[str, Any]]) -> list[Document]:
+    """Convert stored chunk dictionaries into LangChain documents for FAISS indexing."""
+    documents: list[Document] = []
+    for chunk in chunks:
+        text = str(chunk.get("text", "")).strip()
+        if not text:
+            continue
+        documents.append(
+            Document(
+                page_content=text,
+                metadata={
+                    "document_id": chunk.get("document_id"),
+                    "chunk_id": chunk.get("chunk_id"),
+                    "source": chunk.get("source"),
+                    "page": chunk.get("page"),
+                },
+            )
+        )
+    return documents
 
 
 def build_document_index(file_obj: Any, filename: str) -> dict[str, Any]:
@@ -36,21 +50,38 @@ def build_document_index(file_obj: Any, filename: str) -> dict[str, Any]:
     splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
     chunks = splitter.split_documents(documents)
 
-    embeddings = _ensure_embeddings()
+    embeddings = get_embeddings()
     vector_store = FAISS.from_documents(chunks, embeddings)
     vector_store.save_local(str(INDEX_PATH))
 
     return {"chunks": len(chunks), "path": str(INDEX_PATH)}
 
 
-def query_documents(query: str) -> dict[str, Any]:
+def index_uploaded_chunks(chunks: list[dict[str, Any]]) -> dict[str, Any]:
+    """Persist the provided document chunks in the local FAISS index."""
+    documents = chunk_documents(chunks)
+    if not documents:
+        return {"chunks": 0, "path": str(INDEX_PATH)}
+
+    VECTOR_STORE_DIR.mkdir(parents=True, exist_ok=True)
+    embeddings = get_embeddings()
+    if INDEX_PATH.exists():
+        vector_store = FAISS.load_local(str(INDEX_PATH), embeddings, allow_dangerous_deserialization=True)
+        vector_store.add_documents(documents)
+    else:
+        vector_store = FAISS.from_documents(documents, embeddings)
+    vector_store.save_local(str(INDEX_PATH))
+    return {"chunks": len(documents), "path": str(INDEX_PATH)}
+
+
+def query_documents(query: str, k: int = TOP_K) -> dict[str, Any]:
     """Search the local FAISS index for the most relevant document chunks."""
     if not INDEX_PATH.exists():
         return {"query": query, "results": []}
 
-    embeddings = _ensure_embeddings()
+    embeddings = get_embeddings()
     vector_store = FAISS.load_local(str(INDEX_PATH), embeddings, allow_dangerous_deserialization=True)
-    docs = vector_store.similarity_search(query, k=5)
+    docs = vector_store.similarity_search(query, k=k)
 
     return {
         "query": query,
