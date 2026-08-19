@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
+  ArrowLeft,
   Bell,
   BriefcaseBusiness,
   CheckCircle2,
@@ -12,7 +13,7 @@ import {
   Sparkles,
   SunMedium,
 } from 'lucide-react'
-import { Link, NavLink, Route, Routes } from 'react-router-dom'
+import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import DocumentsPage from './pages/DocumentsPage.jsx'
 import InterviewPage from './pages/InterviewPage.jsx'
 import JobMatcherPage from './pages/JobMatcher.jsx'
@@ -52,6 +53,53 @@ const opportunities = [
 
 const backendUrl = 'http://localhost:8000'
 
+function AppShell({ children, theme = 'dark' }) {
+  const location = useLocation()
+  const showBackButton = location.pathname !== '/'
+
+  return (
+    <div className={`app-shell ${theme}`}>
+      <aside className="sidebar">
+        <div className="brand-block">
+          <div className="brand-mark">CP</div>
+          <div>
+            <div className="eyebrow">CareerPilot</div>
+            <h2>AI Workspace</h2>
+          </div>
+        </div>
+
+        <nav className="nav">
+          {navItems.map(({ label, icon: Icon, path }) => (
+            <NavLink key={label} to={path} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+              <Icon size={18} />
+              <span>{label}</span>
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="upgrade-card">
+          <p className="eyebrow">Next upgrade</p>
+          <h3>Interview rehearsal</h3>
+          <p>Unlock mock Q&A and role-specific coaching for your top matches.</p>
+          <button type="button">Preview</button>
+        </div>
+      </aside>
+
+      <main className="main-panel">
+        {showBackButton ? (
+          <div className="page-nav-row">
+            <Link to="/" className="back-btn">
+              <ArrowLeft size={16} />
+              Back to main page
+            </Link>
+          </div>
+        ) : null}
+        {children}
+      </main>
+    </div>
+  )
+}
+
 function PlaceholderPage({ title, description }) {
   return (
     <section className="panel" style={{ marginTop: 18 }}>
@@ -63,8 +111,7 @@ function PlaceholderPage({ title, description }) {
   )
 }
 
-function DashboardPage() {
-  const [theme, setTheme] = useState('dark')
+function DashboardPage({ theme, setTheme }) {
   const [healthStatus, setHealthStatus] = useState('Checking backend...')
   const [question, setQuestion] = useState('How can I position my analytics background for a product role?')
   const [reply, setReply] = useState('')
@@ -217,35 +264,8 @@ function DashboardPage() {
   const themeLabel = useMemo(() => (theme === 'dark' ? 'Light mode' : 'Dark mode'), [theme])
 
   return (
-    <div className={`app-shell ${theme}`}>
-      <aside className="sidebar">
-        <div className="brand-block">
-          <div className="brand-mark">CP</div>
-          <div>
-            <div className="eyebrow">CareerPilot</div>
-            <h2>AI Workspace</h2>
-          </div>
-        </div>
-
-        <nav className="nav">
-          {navItems.map(({ label, icon: Icon, path }) => (
-            <NavLink key={label} to={path} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-              <Icon size={18} />
-              <span>{label}</span>
-            </NavLink>
-          ))}
-        </nav>
-
-        <div className="upgrade-card">
-          <p className="eyebrow">Next upgrade</p>
-          <h3>Interview rehearsal</h3>
-          <p>Unlock mock Q&A and role-specific coaching for your top matches.</p>
-          <button type="button">Preview</button>
-        </div>
-      </aside>
-
-      <main className="main-panel">
-        <header className="topbar">
+    <div className={`dashboard-page ${theme}`}>
+      <header className="topbar">
           <div className="search-box">
             <Search size={16} />
             <input type="text" value="Search roles, skills, resources" readOnly />
@@ -486,21 +506,22 @@ function DashboardPage() {
             ))}
           </div>
         </section>
-      </main>
-    </div>
+      </div>
   )
 }
 
 function App() {
+  const [theme, setTheme] = useState('dark')
+
   return (
     <Routes>
-      <Route path="/" element={<DashboardPage />} />
-      <Route path="/dashboard" element={<DashboardPage />} />
-      <Route path="/documents" element={<DocumentsPage />} />
-      <Route path="/chat" element={<PlaceholderPage title="Chat" description="Chat is not implemented in Phase 2." />} />
-      <Route path="/jobs" element={<JobMatcherPage />} />
-      <Route path="/interview" element={<InterviewPage />} />
-      <Route path="/settings" element={<PlaceholderPage title="Settings" description="This route remains available for future phases." />} />
+      <Route path="/" element={<AppShell theme={theme}><DashboardPage theme={theme} setTheme={setTheme} /></AppShell>} />
+      <Route path="/dashboard" element={<AppShell theme={theme}><DashboardPage theme={theme} setTheme={setTheme} /></AppShell>} />
+      <Route path="/documents" element={<AppShell theme={theme}><DocumentsPage /></AppShell>} />
+      <Route path="/chat" element={<AppShell theme={theme}><PlaceholderPage title="Chat" description="Chat is not implemented in Phase 2." /></AppShell>} />
+      <Route path="/jobs" element={<AppShell theme={theme}><JobMatcherPage /></AppShell>} />
+      <Route path="/interview" element={<AppShell theme={theme}><InterviewPage /></AppShell>} />
+      <Route path="/settings" element={<AppShell theme={theme}><PlaceholderPage title="Settings" description="This route remains available for future phases." /></AppShell>} />
     </Routes>
   )
 }
