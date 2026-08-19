@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { Link, NavLink, Route, Routes } from 'react-router-dom'
 import DocumentsPage from './pages/DocumentsPage.jsx'
+import InterviewPage from './pages/InterviewPage.jsx'
 import JobMatcherPage from './pages/JobMatcher.jsx'
 
 const navItems = [
@@ -498,7 +499,7 @@ function App() {
       <Route path="/documents" element={<DocumentsPage />} />
       <Route path="/chat" element={<PlaceholderPage title="Chat" description="Chat is not implemented in Phase 2." />} />
       <Route path="/jobs" element={<JobMatcherPage />} />
-      <Route path="/interview" element={<PlaceholderPage title="Interview" description="This route remains available for future phases." />} />
+      <Route path="/interview" element={<InterviewPage />} />
       <Route path="/settings" element={<PlaceholderPage title="Settings" description="This route remains available for future phases." />} />
     </Routes>
   )

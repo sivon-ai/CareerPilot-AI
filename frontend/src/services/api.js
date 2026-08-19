@@ -143,6 +143,59 @@ export const matchJob = async (resumeDocumentId, jobDocumentId) => {
   return payload;
 };
 
+export const startInterview = async ({ resume_document_id, job_document_id, interview_type = 'mixed', difficulty = 'medium', question_count = 10 }) => {
+  const response = await fetch(`${API_BASE_URL}/interview/start`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({
+      resume_document_id,
+      job_document_id,
+      interview_type,
+      difficulty,
+      question_count,
+    }),
+  });
+
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(getPayloadError(payload, 'Unable to start the interview.'));
+  }
+
+  return payload;
+};
+
+export const submitInterviewAnswer = async (sessionId, { question_id, answer }) => {
+  const response = await fetch(`${API_BASE_URL}/interview/${sessionId}/answer`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({ question_id, answer }),
+  });
+
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(getPayloadError(payload, 'We couldn\'t evaluate this answer. Please try again.'));
+  }
+
+  return payload;
+};
+
+export const getInterviewReport = async (sessionId) => {
+  const response = await fetch(`${API_BASE_URL}/interview/${sessionId}/report`, {
+    method: 'GET',
+    headers: { Accept: 'application/json' },
+  });
+
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(getPayloadError(payload, 'Unable to load the interview report.'));
+  }
+
+  return payload;
+};
+
 export const getFriendlyApiError = (error) => {
   const message = error?.message || '';
 
