@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CareerPilot AI</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">C</div>
+          <div>
+            <h1>CareerPilot AI</h1>
+            <p>Career guidance assistant</p>
+          </div>
+        </div>
+
+        <nav class="nav">
+          <button class="nav-item active">Chat</button>
+          <button class="nav-item">Documents</button>
+        </nav>
+      </aside>
+
+      <main class="main-panel">
+        <header class="topbar">
+          <h2>Career advisor</h2>
+          <button id="healthBtn" class="secondary-btn">Check API</button>
+        </header>
+
+        <section class="card chat-panel">
+          <div id="chatMessages" class="messages" aria-live="polite">
+            <div class="message bot">
+              Hi! I can help you plan a career move, review your skills, or answer questions about your next steps.
+            </div>
+          </div>
+
+          <form id="chatForm" class="composer">
+            <textarea id="messageInput" rows="3" placeholder="Ask about your career goals..."></textarea>
+            <button type="submit">Send</button>
+          </form>
+        </section>
+
+        <section class="card upload-panel">
+          <h3>Upload resume or notes</h3>
+          <input id="documentInput" type="file" accept="application/pdf" />
+          <button id="uploadBtn" class="secondary-btn">Upload PDF</button>
+          <div id="uploadStatus" class="status"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
