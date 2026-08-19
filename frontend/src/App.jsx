@@ -53,7 +53,7 @@ const opportunities = [
 
 const backendUrl = 'http://localhost:8000'
 
-function AppShell({ children, theme = 'dark' }) {
+function AppShell({ children, theme = 'dark', setTheme }) {
   const location = useLocation()
   const showBackButton = location.pathname !== '/'
 
@@ -67,6 +67,16 @@ function AppShell({ children, theme = 'dark' }) {
             <h2>AI Workspace</h2>
           </div>
         </div>
+
+        <button
+          type="button"
+          className="theme-toggle"
+          onClick={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))}
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {theme === 'dark' ? <SunMedium size={18} /> : <MoonStar size={18} />}
+          <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+        </button>
 
         <nav className="nav">
           {navItems.map(({ label, icon: Icon, path }) => (
@@ -515,13 +525,13 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<AppShell theme={theme}><DashboardPage theme={theme} setTheme={setTheme} /></AppShell>} />
-      <Route path="/dashboard" element={<AppShell theme={theme}><DashboardPage theme={theme} setTheme={setTheme} /></AppShell>} />
-      <Route path="/documents" element={<AppShell theme={theme}><DocumentsPage /></AppShell>} />
-      <Route path="/chat" element={<AppShell theme={theme}><PlaceholderPage title="Chat" description="Chat is not implemented in Phase 2." /></AppShell>} />
-      <Route path="/jobs" element={<AppShell theme={theme}><JobMatcherPage /></AppShell>} />
-      <Route path="/interview" element={<AppShell theme={theme}><InterviewPage /></AppShell>} />
-      <Route path="/settings" element={<AppShell theme={theme}><PlaceholderPage title="Settings" description="This route remains available for future phases." /></AppShell>} />
+      <Route path="/" element={<AppShell theme={theme} setTheme={setTheme}><DashboardPage theme={theme} setTheme={setTheme} /></AppShell>} />
+      <Route path="/dashboard" element={<AppShell theme={theme} setTheme={setTheme}><DashboardPage theme={theme} setTheme={setTheme} /></AppShell>} />
+      <Route path="/documents" element={<AppShell theme={theme} setTheme={setTheme}><DocumentsPage /></AppShell>} />
+      <Route path="/chat" element={<AppShell theme={theme} setTheme={setTheme}><PlaceholderPage title="Chat" description="Chat is not implemented in Phase 2." /></AppShell>} />
+      <Route path="/jobs" element={<AppShell theme={theme} setTheme={setTheme}><JobMatcherPage /></AppShell>} />
+      <Route path="/interview" element={<AppShell theme={theme} setTheme={setTheme}><InterviewPage /></AppShell>} />
+      <Route path="/settings" element={<AppShell theme={theme} setTheme={setTheme}><PlaceholderPage title="Settings" description="This route remains available for future phases." /></AppShell>} />
     </Routes>
   )
 }

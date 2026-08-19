@@ -106,6 +106,26 @@ button {
   background: linear-gradient(180deg, #f5f5f5 0%, #ececec 100%);
 }
 
+.app-shell.light .eyebrow.accent,
+.app-shell.light .helper-text,
+.app-shell.light .page-subtitle,
+.app-shell.light .document-card__meta,
+.app-shell.light .document-card__small-subtle,
+.app-shell.light .documents-empty-state p,
+.app-shell.light .documents-error-box p,
+.app-shell.light .opportunity-item p,
+.app-shell.light .panel-header button,
+.app-shell.light .mini-card span,
+.app-shell.light .mini-card small,
+.app-shell.light .stat-card span,
+.app-shell.light .stat-card small,
+.app-shell.light .opportunity-meta,
+.app-shell.light .uploader,
+.app-shell.light .document-card__meta,
+.app-shell.light .selected-file-panel span {
+  color: #3f3f46;
+}
+
 .sidebar {
   width: 280px;
   border-right: 1px solid var(--border);
@@ -114,11 +134,29 @@ button {
   padding: 24px 18px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 18px;
 }
 
 .light .sidebar {
   background: rgba(255, 255, 255, 0.7);
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(148, 163, 184, 0.08);
+  color: var(--text-strong);
+  font-weight: 600;
+}
+
+.theme-toggle:hover {
+  background: rgba(148, 163, 184, 0.12);
 }
 
 .brand-block {
