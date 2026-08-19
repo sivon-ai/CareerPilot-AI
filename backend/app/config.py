@@ -13,6 +13,9 @@ load_dotenv(ENV_FILE)
 class Settings(BaseModel):
     app_name: str = "CareerPilot AI"
     app_version: str = "0.1.0"
+    environment: str = Field(default="development", alias="ENVIRONMENT")
+    database_url: str = Field(default="sqlite:///./careerpilot.db", alias="DATABASE_URL")
+    test_database_url: str = Field(default="sqlite:///./test.db", alias="TEST_DATABASE_URL")
     gemini_api_key: str = Field(default="", alias="GEMINI_API_KEY")
     gemini_model: str = Field(default="models/gemini-3.6-flash", alias="GEMINI_MODEL")
     embedding_model: str = Field(default="models/gemini-embedding-001", alias="EMBEDDING_MODEL")
@@ -32,10 +35,17 @@ class Settings(BaseModel):
         alias="ALLOWED_ORIGINS",
     )
     max_file_size_mb: int = Field(default=10, alias="MAX_FILE_SIZE_MB")
+    jwt_secret: str = Field(default="careerpilot-super-secret-dev-key", alias="JWT_SECRET")
+    jwt_algorithm: str = Field(default="HS256", alias="JWT_ALGORITHM")
+    access_token_expire_minutes: int = Field(default=60, alias="ACCESS_TOKEN_EXPIRE_MINUTES")
+    rate_limit_chat: int = Field(default=20, alias="RATE_LIMIT_CHAT")
+    rate_limit_upload: int = Field(default=10, alias="RATE_LIMIT_UPLOAD")
+    rate_limit_match: int = Field(default=20, alias="RATE_LIMIT_MATCH")
     upload_dir: Path = Field(default=BASE_DIR / "data" / "uploads")
     processed_dir: Path = Field(default=BASE_DIR / "data" / "processed")
     metadata_dir: Path = Field(default=BASE_DIR / "data" / "metadata")
     vector_store_dir: Path = Field(default=BASE_DIR / "vector_store")
+    faiss_index_path: Path = Field(default=BASE_DIR / "vector_store" / "faiss_index", alias="FAISS_INDEX_PATH")
 
     @field_validator("gemini_api_key")
     @classmethod
@@ -50,7 +60,16 @@ class Settings(BaseModel):
     def from_env(cls) -> "Settings":
         import os
 
+        environment = os.getenv("ENVIRONMENT", "development")
+        default_database_url = (
+            "postgresql+psycopg2://careerpilot:careerpilot@localhost:5432/careerpilot"
+            if environment.lower() == "production"
+            else "sqlite:///./careerpilot.db"
+        )
         raw = {
+            "ENVIRONMENT": environment,
+            "DATABASE_URL": os.getenv("DATABASE_URL", default_database_url),
+            "TEST_DATABASE_URL": os.getenv("TEST_DATABASE_URL", "sqlite:///./test.db"),
             "GEMINI_API_KEY": os.getenv("GEMINI_API_KEY", ""),
             "GEMINI_MODEL": os.getenv("GEMINI_MODEL", "models/gemini-3.6-flash"),
             "EMBEDDING_MODEL": os.getenv("EMBEDDING_MODEL", "models/gemini-embedding-001"),
@@ -62,11 +81,17 @@ class Settings(BaseModel):
                 origin.strip()
                 for origin in os.getenv(
                     "ALLOWED_ORIGINS",
-                    "http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173",
+                    "http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174",
                 ).split(",")
                 if origin.strip()
             ],
             "MAX_FILE_SIZE_MB": int(os.getenv("MAX_FILE_SIZE_MB", "10")),
+            "JWT_SECRET": os.getenv("JWT_SECRET", "careerpilot-super-secret-dev-key"),
+            "JWT_ALGORITHM": os.getenv("JWT_ALGORITHM", "HS256"),
+            "ACCESS_TOKEN_EXPIRE_MINUTES": int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60")),
+            "RATE_LIMIT_CHAT": int(os.getenv("RATE_LIMIT_CHAT", "20")),
+            "RATE_LIMIT_UPLOAD": int(os.getenv("RATE_LIMIT_UPLOAD", "10")),
+            "RATE_LIMIT_MATCH": int(os.getenv("RATE_LIMIT_MATCH", "20")),
         }
         return cls(**raw)
 
